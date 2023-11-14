@@ -1,0 +1,162 @@
+---
+title: "Gun Violence 1982-2023"
+output:
+  ioslides_presentation: default
+  beamer_presentation: default
+  slidy_presentation: default
+date: "`r Sys.Date()`"
+author: "Jennifer Vesper"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo=TRUE, comment="", cache=F)
+library(magrittr)
+library(leaflet)
+library(plotly)
+library(ggplot2)
+```
+
+```{=html}
+<style type="text/css">
+body p, div, h1, h2, h3, h4, h5 {
+color: black;
+font-size: 28px;
+font-family: Trebuchet MS;
+}
+
+slides > slide.title-slide hgroup h1 {
+color: #03060C;
+font-family: Trebuchet MS;
+background: linear-gradient(to left, #000000, #950000,#CC1313  100%);
+background-position: 0 100%;
+background-size: 100% 2px;
+background-repeat: repeat-x;
+}
+
+h2 {
+color: #8C1D40; 
+}
+</style>
+```
+## 1. Mass Shootings- Year and Number of Fatalities
+
+<p style="font-size: 16px">
+
+$\text{Fatalities}=\beta_0+\beta_1\cdot\text{Year}+\varepsilon; \hspace{1cm}\varepsilon\sim\mathcal{N}(0;\sigma^2)$
+
+</p>
+
+```{r}
+# Load ggplot2 package
+library(ggplot2)
+
+shootings <- 
+  read.csv("~/Desktop/US gun violence/shooting_1982-2023_cleaned.csv")
+
+
+g <- ggplot(data = shootings, aes(x = year, y = fatalities, 
+                                  color = gender)) + 
+  geom_point() +
+  geom_smooth(aes(group=1), method = "lm", se = FALSE) +
+ 
+  labs(x = "Year", y = "Fatalities") +
+  ggtitle("Fatalities in Shootings by Year and Gender")
+
+```
+
+\newpage
+
+## 2. Graph showing year of shooting and number of fatalities
+
+This graph shows almost all mass shooters have been men. It also shows there was an increase in the number of fatalities from \~2007-2022
+
+```{r echo=FALSE, fig.height=4,fig.width=8}
+  g
+```
+
+## 3. Mass Shootings by race, age, and number of fatalities
+
+```{r echo=FALSE}
+# Load ggplot2 package
+library(ggplot2)
+
+shootings <- 
+  read.csv("~/Desktop/US gun violence/shooting_1982-2023_cleaned.csv")
+
+plot_ly(data = shootings, x = ~race, y = ~age_of_shooter, z = ~fatalities, color = ~gender) %>%
+  add_markers() %>%
+  layout(scene = list(xaxis = list(title = "Race"), yaxis = list(title = "Age of Shooter"), zaxis = list(title = "Fatalities")))
+
+```
+
+## 4. Mass shootings and mental health
+
+There is a lot of debate on whether we have a gun problem or a mental health problem
+
+```{r echo = FALSE}
+library(ggplot2)
+
+ggplot(data = shootings, aes(x = prior_signs_mental_health_issues, 
+                             fill = gender)) +
+  geom_bar(position = "dodge", stat = "count") +
+  ggtitle("Number of Shootings by Gender and Prior Signs of Mental Health Issues")
+  labs(x = "Mental Health Issues", 
+       y = "Count", fill = "Gender")
+
+
+```
+
+## 5. Mass Shootings - was the weapon obtained legally?
+
+```{r echo=TRUE}
+library(plotly)
+
+plot1 <- plot_ly(data = shootings, x = ~year, y = ~location, 
+                 color = ~weapons_obtained_legally,
+        type = "scatter", mode = "markers") %>%
+  layout(title = "Weapons Obtained Legally by Year and Type",
+         xaxis = list(title = "Year", dtick = 10), 
+         yaxis = list(title = "Location"))
+
+
+```
+
+## 6. Graph: location, year, and if the weapon was obtained legally.
+
+<p style="font-size: 10px;text-align:center;">
+
+$\text{Percentage Obtained Legally} =\frac{95}{141}\times{100} =\text{67.4%}$ <br> $\text{Percentage Obtained Illegally} =\frac{16}{141}\times{100} =\text{11.3%}$<br>$\text{Percentage TBD/Unknown} =\frac{30}{141}\times{100} =\text{21.3%}$
+
+</p>
+
+</p>
+
+```{r echo=FALSE}
+plot1
+```
+
+## 7. Frequency and Age Range
+
+```{r}
+library(ggplot2)
+
+shootings <- 
+  read.csv("~/Desktop/US gun violence/shooting_1982-2023_cleaned.csv")
+
+shootings_clean <- na.omit(shootings)
+
+g3 <- ggplot(shootings_clean, aes(x = age_group, fill = age_group)) +
+  geom_bar(stat = "count", color = "black") +
+  labs(title = 
+         "Frequency of Shootings by Age Group",
+       x = "Age Group", y = "Count")
+
+
+
+```
+
+## 8. Histogram Showing Frequency of Shootings Based on Age Range
+
+```{r echo=FALSE}
+g3
+```
