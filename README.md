@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @jvesper
-- 👀 I’m interested in all things software
-- 🌱 I’m currently learning SQL and refreshing on Java, C, and C++
+- 👀 I’m interested in all things software, math, and data <3 
+- 🌱 I’m currently learning learning advanced SQL and database managment systems
 - 💞️ I’m looking to collaborate on anything to improve my skills
 - 📫 How to reach me jennifer.vesper@icloud.com
 
