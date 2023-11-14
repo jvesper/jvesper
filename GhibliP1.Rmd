@@ -1,0 +1,198 @@
+---
+title: "Studio Ghibli Characters"
+author: "Jennifer Vesper"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+
+```{=html}
+<style type="text/css">
+body p, div, h1, h2, h3, h4, h5 {
+color: black;
+font-family: Modern Computer Roman;
+}
+slides > slide.title-slide hgroup h1 {
+background-color: thistle ;
+color: white; 
+font-family: tahoma;
+}
+h2 {
+color: PaleVioletRed;
+}
+</style>
+```
+```{=html}
+<script>
+
+    .gdbar img {
+        width: 300px !important;
+        height: 150px !important;
+        margin: 8px 8px;
+    }
+
+    .gdbar {
+        width: 400px !important;
+        height: 170px !important;
+    }
+
+
+</script>
+```
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, code_folding = "hide")
+
+```
+
+## Objective
+
+My goal is to group the characters by their species and then organize information about each species into categories of age, height, and special powers. To clarify further, a "group" in this context I want to gather all the characters of a particular species together so that I can analyze their data collectively.The dataset itself contains 56 rows (or entries) and 9 columns of data. Each row represents a single character, and each column contains a specific piece of information about that character (such as their name, species, age, height, etc.). By organizing the data in this way, I may be able to identify patterns or trends that exist within each species.
+
+![](pngwing.com.png){width="247"}
+
+## Importing libraries
+
+```{r echo=TRUE, results='hide', message = FALSE}
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(plotly)
+Ghibli <- read_csv("Ghibli characters.csv")
+```
+
+Once I have imported my dataset, I will have the option to set the `echo` parameter to either `TRUE` or `FALSE` in order to display or hide the code in my slides. To read the CSV file that contains my data, I will use the `read_csv` function from the `readr` library, which I will import as needed. Additionally, I will import the `tidyverse`, `ggplot2`, and `plotly` libraries, which will allow me to manipulate and visualize the data using a variety of graphs and charts.
+
+## Data Overview
+
+The **`Ghibli_characters`** dataset is comprised of 56 rows and 9 columns, with each row representing a unique character. The data is categorized into several columns including **`name`**, **`age`** (which ranges from 2 to 1302 years old), **`height`** (in centimeters), **`special powers`**, **`country`**, **`gender`**, **`species`** (which includes various categories such as human, spirit, cat, goddess, wizard, and more), **`movie title`**, and **`release date`** of the movie.
+
+![](nf.png){width="308" height="308"}
+
+## Data Overview Continued
+
+```{r echo=TRUE}
+head(Ghibli[,1:4])
+```
+
+## Data Cleaning
+
+-   **Data Inspection:**
+    -   Upon inspecting the dataset, I see 1 duplicate row of character Sosuke from Ponyo. One of these rows has a N/A value in special powers, so I will not be including that row in my data manipulation.
+-   **Data Validation:**
+    -   The data has correct data types and values to be used in my objective
+-   **Data Transformation:**
+    -   All of the data in the original dataset is in the correct format for producing my objective
+
+## Data Cleaning Continued
+
+-   **Data imputation:**
+    -   For the N/A values within the dataset I will be researching to see if I can fill them in with correct data values.
+-   **Data filtering:**
+    -   I will be excluding the **`country`**, **`movie title`**, and **`release year`** columns from my manipulations. These columns are not relevant to my analysis, and I am focusing instead on the characteristics of each character such as their age, height, special powers, gender, and species.
+
+## Data Cleaning Code
+
+```{r echo=TRUE}
+# Load required packages
+library(dplyr)
+
+# Read in the dataset
+Ghibli <- read.csv("Ghibli characters.csv")
+
+# Remove duplicates in the character name column
+Ghibli <- distinct(Ghibli, character.name, .keep_all = TRUE)
+
+# Drop the irrelevant columns
+Ghibli <- select(Ghibli, -c(country...place.of.residence, 
+                            movie, release.date))
+
+```
+
+## Data Exploration - Age & Height
+
+```{r echo = FALSE, message=FALSE}
+library(plotly)
+
+plot_ly(data = Ghibli, x = ~height..cm., y = ~age, text = ~character.name, type = "scatter", mode = "markers",
+        marker = list(size = 5, color = "#ff6699")) %>% 
+  layout(title = "Age V. Height of Ghibli Characters", 
+         xaxis = list(title = "Height (cm)"), 
+         yaxis = list(title = "Age"), 
+         showlegend = FALSE)
+
+
+```
+
+## Data Exploration - Age, Height, Species, & Powers
+
+```{r Model creation, echo=TRUE, fig.height=4, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(plotly)
+fig <- plot_ly(data = Ghibli, x = ~Ghibli$height..cm., 
+               y = ~Ghibli$age, type = 'scatter',
+  mode = 'markers', symbol = ~Ghibli$Species, 
+  symbols = c('circle', 'circle-open', 'x','square', 'square-open', 
+              'diamond', 'diamond-open','cross', 'cross-open', 
+              'triangle-up', 'triangle-up-open', 
+              'hexagon','hexagon-open', 'triangle-nw', 
+              'triangle-nw-open'), 
+col = unique(Ghibli$special.powers),
+   marker = list(size = 10)) %>%
+  layout(xaxis = list(title="Height (cm)"),
+         yaxis = list(title = "Age"),
+         legend = list(title=list(text = 
+          "Species (Symbol)<br>Special Powers (Color)")),
+         title = list(text = "Ghibli Characters Age, 
+                      Height, Species, and Powers"))
+
+
+```
+
+## Data Exploration - Age, Height, Species, and Powers
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+fig
+
+```
+
+## Model Creation
+
+```{r echo=TRUE, message=FALSE, comment=FALSE, warning=FALSE}
+library(plotly)
+
+# Create a subset of the data with only the columns needed for the plot
+bubble_data <- Ghibli %>%
+  select(Species, special.powers, height..cm.)
+
+# Group the data by species, special powers and height and count the number of characters in each group
+bubble_data <- bubble_data %>%
+  group_by(Species, special.powers, height..cm.) %>%
+  summarise(count = n())
+
+# Create the bubble chart
+bubbles <- plot_ly(bubble_data, x = ~special.powers, y = ~height..cm., size = ~count, 
+        color = ~Species, colors = "Set1", type = 'scatter',
+        mode = 'markers', hoverinfo = 'text',
+        text = ~paste("Species: ", Species, "<br>",
+                      "Special Power: ", special.powers, "<br>",
+                      "Height: ", height..cm., "<br>",
+                      "Count: ", count)) %>%
+  layout(title = "Comparison of Species and Special Powers by Height",
+         xaxis = list(title = "Special Powers"),
+         yaxis = list(title = "Height (cm)"),
+         showlegend = TRUE,
+         height = 800)
+
+
+```
+
+## Model Creation Bubble Plot
+
+```{r message=FALSE, warning=FALSE}
+bubbles
+```
+
+## Conclusion
+
+Based on the data analysis, it was found that humans within the Ghibli world are around the same height and similar ages. The largest and oldest character is a spirit at 215 cm and 1302 years old. Species do not tend to cluster together in size/age except for humans. Additionally, the visualization shows the distribution of characters based on their species, special powers, age, and height.Overall, the data analysis provides valuable insights into the Ghibli world, specifically the characteristics of its characters. The findings could be useful for researchers and fans interested in exploring the diversity and complexity of the Ghibli universe. Further research could expand on this analysis by examining other aspects of the characters, such as their personalities, relationships, and motivations.
+
+![Totoro](pngegg.png){width="90"}
